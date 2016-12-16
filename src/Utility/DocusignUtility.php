@@ -17,6 +17,13 @@ use DocuSign\eSign\Api\UsersApi;
 
 class DocusignUtility
 {
+
+    /**
+     * Global Config
+     * @var Array
+     */
+    protected $globalConfig;
+
     /**
      * Account ID
      * @var string
@@ -85,6 +92,7 @@ class DocusignUtility
      */
     public function __construct()
     {
+        $this->globalConfig = Configure::read('Docusign');
         $this->defaults = Configure::read('Docusign.defaults');
         $configOptions = Configure::read('Docusign.config');
         $this->config = $this->getConfig($configOptions);
@@ -354,12 +362,20 @@ class DocusignUtility
         $this->envelope->setEventNotification($eventNotification);
     }
 
+    /**
+     * Writes a file to the configured filepath
+     * 
+     * @param  string $pdfBase64 Base64 encoded pdf file contents
+     * @param  string $fileName  Name of the file - defaults to `time()`
+     * @return Array            Associative array of file data
+     */
     public static function saveFile($pdfBase64, $fileName = null)
     {
+        $filePath = $this->globalConfig['paths']['file'];
         if (is_null($fileName)) {
             $fileName = time() . '.pdf';
         }
-        $file = new File("/tmp/{$fileName}", true, 0777);
+        $file = new File("{$filePath}/{$fileName}", true, 0777);
         $file->open('w');
         $file->write(base64_decode($pdfBase64), true);
         $file->close();
