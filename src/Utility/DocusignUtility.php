@@ -371,7 +371,8 @@ class DocusignUtility
      */
     public static function saveFile($pdfBase64, $fileName = null)
     {
-        $filePath = $this->globalConfig['paths']['file'];
+        $globalConfig = Configure::read('Docusign');
+        $filePath = $globalConfig['paths']['file'];
         if (is_null($fileName)) {
             $fileName = time() . '.pdf';
         }
