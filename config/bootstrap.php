@@ -25,7 +25,7 @@ $defaultConfig = [
 ];
 
 $docusign = $docusign ? $docusign : $defaultConfig;
-
+$docusign['paths'] = isset($docusign['paths']) ? $docusign['paths'] : [];
 $docusign['config']['host'] = $appEnv == 'production' ? $hosts['production'] : $hosts['develop'];
 $docusign['paths']['file'] = isset($docusign['paths']['file']) && !empty($docusign['paths']['file']) ? $docusign['paths']['file'] : '/tmp';
 
