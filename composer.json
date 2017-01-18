@@ -1,5 +1,5 @@
 {
-    "name": "tgrowden/Docusign",
+    "name": "queencitycodefactory/Docusign",
     "description": "Docusign Utility plugin for CakePHP",
     "type": "cakephp-plugin",
     "require": {
