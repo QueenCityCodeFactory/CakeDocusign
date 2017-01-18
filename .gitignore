@@ -1,3 +1,6 @@
-/.phpintel
-/composer.lock
+.DS_Store
+
 /vendor
+/.phpintel
+/.vscode
+/.phpintel
