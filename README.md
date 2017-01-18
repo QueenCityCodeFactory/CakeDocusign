@@ -17,7 +17,7 @@ In your project's `composer.json`, add the following:
 "repositories": [
     {
         "type": "vcs",
-        "url": "https://github.com/tgrowden/CakeDocusign"
+        "url": "https://github.com/QueenCityCodeFactory/CakeDocusign"
     }
 ],
 
@@ -27,11 +27,11 @@ In your project's `composer.json`, add the following:
 The recommended way to install composer packages is:
 
 ```
-composer require tgrowden/Docusign
+composer require queencitycodefactory/Docusign
 ```
 
 ---
 
 ## License
 
-This project is licensed under the MIT license.
+This project is licensed under the [MIT license](LICENSE).

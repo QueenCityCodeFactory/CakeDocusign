@@ -1,7 +1,15 @@
 {
-    "name": "tgrowden/Docusign",
-    "description": "Docusign Utility plugin for CakePHP",
+    "name": "queencitycodefactory/Docusign",
+    "description": "Docusign Utility plugin for CakePHP 3.x",
     "type": "cakephp-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Taylor Growden",
+            "email": "taylor@teamwilletts.com",
+            "homepage": "https://github.com/tgrowden"
+        }
+    ],
     "require": {
         "php": ">=5.5.9",
         "cakephp/cakephp": ">=3.3.2 <4.0.0",
