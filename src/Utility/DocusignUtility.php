@@ -6,14 +6,14 @@ use Cake\Core\Configure;
 use Cake\Filesystem\File;
 use Cake\Network\Exception\InternalErrorException as Exception;
 use Cake\Routing\Router;
-use DocuSign\eSign\Api\AuthenticationApi;
-use DocuSign\eSign\Api\EnvelopesApi;
 use DocuSign\eSign\ApiClient;
 use DocuSign\eSign\ApiException;
+use DocuSign\eSign\Api\AuthenticationApi;
+use DocuSign\eSign\Api\EnvelopesApi;
+use DocuSign\eSign\Api\UsersApi;
 use DocuSign\eSign\Configuration;
 use DocuSign\eSign\Model;
 use DocuSign\eSign\ObjectSerializer;
-use DocuSign\eSign\Api\UsersApi;
 
 class DocusignUtility
 {
@@ -87,7 +87,7 @@ class DocusignUtility
 
     /**
      * Construct method
-     * 
+     *
      * @return void
      */
     public function __construct()
@@ -102,32 +102,34 @@ class DocusignUtility
 
     /**
      * Set Client
-     *
+     * @param Configuration $config The config object
      * @return DocuSign\eSign\ApiClient
      */
     public function setClient(Configuration $config)
     {
         $apiClient = new ApiClient($config);
+
         return $apiClient;
     }
 
     /**
      * setup config
-     * 
+     * @param array $configOptions the configuration options
      * @return DocuSign\eSign\Configuration
      */
-    protected function getConfig(Array $configOptions)
+    protected function getConfig(array $configOptions)
     {
         $config = new Configuration();
         $config->setHost($configOptions['host']);
         $config->addDefaultHeader("X-DocuSign-Authentication", "{\"Username\":\"" . $configOptions['username'] . "\",\"Password\":\"" . $configOptions['password'] . "\",\"IntegratorKey\":\"" . $configOptions['integrator_key'] . "\"}");
+
         return $config;
     }
 
     /**
      * Login
-     * 
-     * @return $loginInformation
+     * @param ApiClient $apiClient the API client
+     * @return \DocuSign\eSign\Model\LoginInformation
      * @throws \Cake\Network\Exception\InternalErrorException upon failure
      */
     protected function login(ApiClient $apiClient)
@@ -144,17 +146,18 @@ class DocusignUtility
                 $this->config->setHost($host);
                 $this->apiClient = new ApiClient($this->config);
                 $this->accountId = $this->loginAccount->getAccountId();
+
                 return $loginInformation;
             }
         } catch (ApiException $e) {
-            throw new Exception ($e->getMessage());
+            throw new Exception($e->getMessage());
         }
     }
 
     /**
      * Setup the envelope API
      *
-     * @return void
+     * @return \DocuSign\eSign\Api\EnvelopesApi
      */
     protected function setEnvelopeApi()
     {
@@ -163,8 +166,8 @@ class DocusignUtility
 
     /**
      * Instantiates a new envelope object
-     * 
-     * @param  string $emailSubject
+     *
+     * @param  string $emailSubject the email subject
      * @return \DocuSign\eSign\Model\Envelope
      */
     public function createEnvelope($emailSubject = null)
@@ -177,6 +180,7 @@ class DocusignUtility
         $envelope = new Model\EnvelopeDefinition();
         $envelope->setEmailSubject($emailSubject);
         $this->envelope = $envelope;
+
         return $envelope;
     }
 
@@ -190,16 +194,17 @@ class DocusignUtility
         $options = new EnvelopesApi\CreateEnvelopeOptions();
         $options->setCdseMode(null);
         $options->setMergeRolesOnDraft(null);
+
         return $options;
     }
 
     /**
      * Set envelope recipients
-     * 
-     * @param Array $recipients
+     *
+     * @param array $recipients The envelope recipients
      * @return void
      */
-    public function setRecipients(Array $recipients)
+    public function setRecipients(array $recipients)
     {
         $recipientModel = new Model\Recipients();
         $signers = [];
@@ -208,7 +213,7 @@ class DocusignUtility
         }
 
         $inPersonSigners = [];
-        foreach($recipients['in_person_signers'] as $signer) {
+        foreach ($recipients['in_person_signers'] as $signer) {
             $inPersonSigners[] = new Model\InPersonSigner($signer);
         }
 
@@ -219,7 +224,8 @@ class DocusignUtility
 
     /**
      * send method
-     * 
+     *
+     * @param bool $eventNotification Whether or not to setup event notifications
      * @return \DocuSign\eSign\Model\EnvelopeSummary - summary of envelope
      * @throws \Cake\Network\Exception\InternalErrorException upon failure
      */
@@ -245,25 +251,47 @@ class DocusignUtility
         }
     }
 
-
+    /**
+     * Get Users method
+     *
+     * @param array  $queryParams  parameters to be place in query URL
+     * @param array  $postData     parameters to be placed in POST body
+     * @param array  $headerParams parameters to be place in request header
+     * @param string $responseType expected response type of the endpoint
+     * @return mixed
+     */
     public function getUsers($queryParams = null, $postData = null, $headerParams = null, $responseType = null)
     {
         $request = $this->apiClient->callApi('/v2/accounts/' . $this->accountId . '/users', 'GET', $queryParams, $postData, $headerParams, $responseType);
+
         return $request[0];
     }
 
-    public function createUser(Array $postData)
+    /**
+     * Create User method
+     *
+     * @param array $postData The post data
+     * @return string The User ID
+     */
+    public function createUser(array $postData)
     {
         $config = $this->getConfig(Configure::read('Docusign.config'));
         $config->addDefaultHeader('X-DocuSign-SDK', 'PHP');
         $config->addDefaultHeader('Content-Type', 'application/json');
         $apiClient = new ApiClient($config);
-        
+
         $response = $apiClient->callApi('/v2/accounts/' . $this->accountId . '/users', 'POST', null, $postData, null, null);
         $userId = $response[0]->newUsers[0]->userId;
+
         return $userId;
     }
 
+    /**
+     * Delete User method
+     *
+     * @param string|null $id The User ID
+     * @return mixed
+     */
     public function deleteUser($id = null)
     {
         if (is_null($id)) {
@@ -281,12 +309,21 @@ class DocusignUtility
         $config->addDefaultHeader('X-DocuSign-SDK', 'PHP');
         $config->addDefaultHeader('Content-Type', 'application/json');
         $apiClient = new ApiClient($config);
-        
+
         $response = $apiClient->callApi('/v2/accounts/' . $this->accountId . '/users', 'DELETE', null, $postData, null, null);
+
         return $response;
     }
 
-    public static function setSigningTabs(Array $recipients, $documentId = 1, $anchorConfig = [])
+    /**
+     * Set Signing Tabs method
+     *
+     * @param array $recipients The envelope recipients
+     * @param int $documentId The document's id
+     * @param array $anchorConfig Configuration options for anchor tabs
+     * @return array
+     */
+    public static function setSigningTabs(array $recipients, $documentId = 1, $anchorConfig = [])
     {
         if (empty($anchorConfig)) {
             $anchorConfig = [
@@ -297,7 +334,6 @@ class DocusignUtility
         }
         foreach ($recipients as $type => &$collection) {
             foreach ($collection as $key => &$signer) {
-
                 $signHereTab = new Model\SignHere([
                     'document_id' => $documentId,
                     'anchor_string' => $signer['role'] . ' Signature',
@@ -324,9 +360,14 @@ class DocusignUtility
                 ];
             }
         }
+
         return $recipients;
     }
 
+    /**
+     * Add Event Notification method
+     * @return void
+     */
     protected function addEventNotification()
     {
         $envelopeEvents = [
@@ -364,14 +405,15 @@ class DocusignUtility
 
     /**
      * Writes a file to the configured filepath
-     * 
+     *
      * @param  string $pdfBase64 Base64 encoded pdf file contents
      * @param  string $fileName  Name of the file - defaults to `time()`
-     * @return Array            Associative array of file data
+     * @return array Associative array of file data
      */
     public static function saveFile($pdfBase64, $fileName = null)
     {
-        $filePath = $this->globalConfig['paths']['file'];
+        $globalConfig = Configure::read('Docusign');
+        $filePath = $globalConfig['paths']['file'];
         if (is_null($fileName)) {
             $fileName = time() . '.pdf';
         }
@@ -380,6 +422,7 @@ class DocusignUtility
         $file->write(base64_decode($pdfBase64), true);
         $file->close();
         $info = $file->info();
+
         return [
             'name' => $fileName,
             'type' => $info['mime'],
