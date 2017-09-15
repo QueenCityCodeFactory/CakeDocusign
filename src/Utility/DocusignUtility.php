@@ -1,5 +1,4 @@
 <?php
-
 namespace Docusign\Utility;
 
 use Cake\Core\Configure;
