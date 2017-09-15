@@ -84,7 +84,6 @@ class DocusignUtility
      */
     public $envelope;
 
-
     /**
      * Construct method
      *
