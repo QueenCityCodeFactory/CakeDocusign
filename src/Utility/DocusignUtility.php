@@ -84,7 +84,6 @@ class DocusignUtility
      */
     public $envelope;
 
-
     /**
      * Construct method
      *
@@ -139,7 +138,21 @@ class DocusignUtility
         try {
             $loginInformation = $authenticationApi->login($options);
             if (isset($loginInformation) && count($loginInformation) > 0) {
-                $this->loginAccount = $loginInformation->getLoginAccounts()[0];
+                $loginAccounts = $loginInformation->getLoginAccounts();
+                $globalConfig = $this->globalConfig;
+                $accountId = $globalConfig['config']['accountId'];
+                $_loginAccount = null;
+                foreach ($loginAccounts as $_account) {
+                    if ($_account->getAccountId() === $accountId) {
+                        $_loginAccount = $_account;
+                    }
+                }
+
+                if (empty($_loginAccount)) {
+                    $_loginAccount = $loginAccounts[0];
+                }
+
+                $this->loginAccount = $_loginAccount;
                 $host = $this->loginAccount->getBaseURL();
                 $host = explode('/v2', $host);
                 $host = $host[0];
