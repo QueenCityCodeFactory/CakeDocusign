@@ -219,18 +219,23 @@ class DocusignUtility
     public function setRecipients(array $recipients)
     {
         $recipientModel = new Model\Recipients();
-        $signers = [];
-        foreach ($recipients['signers'] as $signer) {
-            $signers[] = new Model\Signer($signer);
+
+        if (!empty($recipients['signers'])) {
+            $signers = [];
+            foreach ($recipients['signers'] as $signer) {
+                $signers[] = new Model\Signer($signer);
+            }
+            $recipientModel->setSigners($signers);
         }
 
-        $inPersonSigners = [];
-        foreach ($recipients['in_person_signers'] as $signer) {
-            $inPersonSigners[] = new Model\InPersonSigner($signer);
+        if (!empty($recipients['in_person_signers'])) {
+            $inPersonSigners = [];
+            foreach ($recipients['in_person_signers'] as $signer) {
+                $inPersonSigners[] = new Model\InPersonSigner($signer);
+            }
+            $recipientModel->setInPersonSigners($inPersonSigners);
         }
 
-        $recipientModel->setSigners($signers);
-        $recipientModel->setInPersonSigners($inPersonSigners);
         $this->envelope->setRecipients($recipientModel);
     }
 
