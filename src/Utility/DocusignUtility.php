@@ -136,7 +136,7 @@ class DocusignUtility
         $options = new AuthenticationApi\LoginOptions();
         try {
             $loginInformation = $authenticationApi->login($options);
-            if (isset($loginInformation) && count($loginInformation->getLoginAccounts()) > 0) {
+            if (isset($loginInformation) && !empty($loginInformation->getLoginAccounts())) {
                 $loginAccounts = $loginInformation->getLoginAccounts();
                 $globalConfig = $this->globalConfig;
                 $accountId = $globalConfig['config']['accountId'];
